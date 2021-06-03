@@ -28,7 +28,7 @@ const factoryParams: UseCartFactoryParams<Cart, CartItem, Product, Coupon> = {
         const result = await context.$magento.api.customerCart();
 
         return result.data.customerCart as unknown as Cart;
-      } catch (e) { // Signed up user don't have a cart.
+      } catch { // Signed up user don't have a cart.
         apiState.setCartId(null);
         apiState.setCustomerToken(null);
 
@@ -52,7 +52,7 @@ const factoryParams: UseCartFactoryParams<Cart, CartItem, Product, Coupon> = {
       Logger.debug(cartResponse);
 
       return cartResponse.data.cart as unknown as Cart;
-    } catch (e) {
+    } catch {
       apiState.setCartId(null);
 
       return await factoryParams.load(context, {}) as unknown as Cart;
@@ -61,6 +61,8 @@ const factoryParams: UseCartFactoryParams<Cart, CartItem, Product, Coupon> = {
   addItem: async (context: Context, {
     product,
     quantity,
+    currentCart,
+    customQuery,
   }) => {
     const apiState = context.$magento.config.state;
     let currentCartId = apiState.getCartId();
@@ -74,62 +76,72 @@ const factoryParams: UseCartFactoryParams<Cart, CartItem, Product, Coupon> = {
     if (!product) {
       return;
     }
-
-    // @ts-ignore
-    // eslint-disable-next-line no-underscore-dangle
-    switch (product.__typename) {
-      case 'SimpleProduct':
-        const simpleCartInput: AddSimpleProductsToCartInput = {
-          cart_id: currentCartId,
-          cart_items: [
-            {
-              data: {
-                quantity,
-                sku: product.sku,
+    try {
+      // @ts-ignore
+      // eslint-disable-next-line no-underscore-dangle
+      switch (product.__typename) {
+        case 'SimpleProduct':
+          const simpleCartInput: AddSimpleProductsToCartInput = {
+            cart_id: currentCartId,
+            cart_items: [
+              {
+                data: {
+                  quantity,
+                  sku: product.sku,
+                },
               },
-            },
-          ],
-        };
+            ],
+          };
 
-        const simpleProduct = await context.$magento.api.addSimpleProductsToCart(simpleCartInput);
+          const simpleProduct = await context.$magento.api.addSimpleProductsToCart(simpleCartInput);
 
-        return simpleProduct
-          .data
-          .addSimpleProductsToCart
-          .cart as unknown as Cart;
+          return simpleProduct
+            .data
+            .addSimpleProductsToCart
+            .cart as unknown as Cart;
 
-      case 'ConfigurableProduct':
-        const configurableCartInput: AddConfigurableProductsToCartInput = {
-          cart_id: currentCartId,
-          cart_items: [
-            {
-              parent_sku: product.sku,
-              data: {
-                quantity,
-                sku: product.sku,
+        case 'ConfigurableProduct':
+          const configurableCartInput: AddConfigurableProductsToCartInput = {
+            cart_id: currentCartId,
+            cart_items: [
+              {
+                parent_sku: product.sku,
+                data: {
+                  quantity,
+                  sku: product.sku,
+                },
               },
-            },
-          ],
-        };
+            ],
+          };
 
-        const configurableProduct = await context.$magento.api.addConfigurableProductsToCart(configurableCartInput);
+          const configurableProduct = await context.$magento.api.addConfigurableProductsToCart(configurableCartInput);
 
-        return configurableProduct
-          .data
-          .addConfigurableProductsToCart
-          .cart as unknown as Cart;
-      default:
-        // todo implement other options
-        // @ts-ignore
-        // eslint-disable-next-line no-underscore-dangle
-        throw new Error(`Product Type ${product.__typename} not supported in add to cart yet`);
+          return configurableProduct
+            .data
+            .addConfigurableProductsToCart
+            .cart as unknown as Cart;
+        default:
+          // todo implement other options
+          // @ts-ignore
+          // eslint-disable-next-line no-underscore-dangle
+          throw new Error(`Product Type ${product.__typename} not supported in add to cart yet`);
+      }
+    } catch {
+      await factoryParams.clear(context, null);
+
+      await factoryParams.addItem(context, {
+        product,
+        quantity,
+        currentCart,
+        customQuery,
+      });
     }
   },
   removeItem: async (context: Context, {
     currentCart,
     product,
   }) => {
-    const item = currentCart.items.find((cartItem) => cartItem.product.uid === product.uid);
+    const item = currentCart.items.find((cartItem) => cartItem.uid === product.uid);
 
     if (!item) {
       return;
@@ -137,7 +149,7 @@ const factoryParams: UseCartFactoryParams<Cart, CartItem, Product, Coupon> = {
 
     const removeItemParams: RemoveItemFromCartInput = {
       cart_id: currentCart.id,
-      cart_item_id: Number.parseInt(item.uid, 10),
+      cart_item_uid: item.uid,
     };
 
     const { data } = await context.$magento.api.removeItemFromCart(removeItemParams);
@@ -156,7 +168,7 @@ const factoryParams: UseCartFactoryParams<Cart, CartItem, Product, Coupon> = {
       cart_id: currentCart.id,
       cart_items: [
         {
-          cart_item_id: Number.parseInt(product.uid, 10),
+          cart_item_uid: product.uid,
           quantity,
         },
       ],
@@ -169,7 +181,7 @@ const factoryParams: UseCartFactoryParams<Cart, CartItem, Product, Coupon> = {
       .cart as unknown as Cart;
   },
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  clear: async (context: Context, { currentCart }) => {
+  clear: async (context: Context, _params = null) => {
     context.$magento.config.state.setCartId(null);
 
     return factoryParams.load(context, {});

@@ -1,4 +1,20 @@
 import webpack from 'webpack';
+import middleware from './middleware.config';
+import { getRoutes } from './routes';
+
+const {
+  integrations: {
+    magento: {
+      configuration: {
+        cookies,
+        externalCheckout,
+        tax,
+        defaultStore,
+        websites,
+      },
+    },
+  },
+} = middleware;
 
 export default {
   ssr: true,
@@ -60,6 +76,9 @@ export default {
     ['@vue-storefront/nuxt', {
       // @core-development-only-start
       coreDevelopment: true,
+      logger: {
+        verbosity: 'debug',
+      },
       // @core-development-only-end
       useRawSource: {
         dev: [
@@ -80,6 +99,7 @@ export default {
           composables: '@vue-storefront/magento',
         },
       },
+      routes: false,
     }],
     // @core-development-only-end
     /* project-only-start
@@ -89,6 +109,12 @@ export default {
       i18n: {
         useNuxtI18nConfig: true,
       },
+      cookies,
+      externalCheckout,
+      tax,
+      defaultStore,
+      websites,
+
     }],
   ],
   modules: [
@@ -185,5 +211,10 @@ export default {
         }),
       }),
     ],
+  },
+  router: {
+    extendRoutes(routes) {
+      getRoutes(`${__dirname}/_theme`).forEach((route) => routes.unshift(route));
+    },
   },
 };

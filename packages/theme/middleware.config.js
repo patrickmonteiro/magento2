@@ -1,11 +1,28 @@
-require('dotenv').config();
+const config = require('./config.js');
 
 module.exports = {
   integrations: {
     magento: {
       location: '@vue-storefront/magento-api/server',
       configuration: {
-        api: process.env.MAGENTO_GRAPHQL,
+        api: config.get('magentoGraphQl'),
+        cookies: {
+          currencyCookieName: 'vsf-currency',
+          countryCookieName: 'vsf-country',
+          localeCookieName: 'vsf-locale',
+          cartCookieName: 'vsf-cart',
+          customerCookieName: 'vsf-customer',
+          storeCookieName: 'vsf-store',
+        },
+        defaultStore: 'default',
+        externalCheckout: {
+          enable: config.get('enableMagentoExternalCheckout'),
+          cmsUrl: config.get('externalCheckoutUrl'),
+          syncUrlPath: config.get('externalCheckoutSyncPath'),
+          stores: {
+            default: config.get('enableMagentoExternalCheckout'),
+          },
+        },
         tax: {
           displayCartSubtotalIncludingTax: true,
         },
@@ -25,18 +42,6 @@ module.exports = {
               },
             },
           },
-        },
-        externalCheckout: {
-          enable: false,
-        },
-        defaultStore: 'default',
-        cookies: {
-          currencyCookieName: 'vsf-currency',
-          countryCookieName: 'vsf-country',
-          localeCookieName: 'vsf-locale',
-          cartCookieName: 'vsf-cart',
-          customerCookieName: 'vsf-customer',
-          storeCookieName: 'vsf-store',
         },
       },
     },
