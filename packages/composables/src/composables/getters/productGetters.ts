@@ -32,6 +32,7 @@ export const getSlug = (product: Product, category?: Category): string => {
   }
 
   url = `/${rewrites[0].url}`;
+  // eslint-disable-next-line no-restricted-syntax
   for (const rewrite of rewrites) {
     if (category && category.uid) {
       url = `/${rewrite.url}`;
@@ -64,12 +65,16 @@ export const getPrice = (product: Product): AgnosticPrice => {
 export const getGallery = (product: Product): AgnosticMediaGalleryItem[] => {
   const images = [];
 
-  if (!product?.media_gallery) {
+  if (!product?.media_gallery && !product?.configurable_product_options_selection?.media_gallery) {
     return images;
   }
 
-  for (let i = 0; i < product.media_gallery.length; i += 1) {
-    const galleryItem = product.media_gallery[i];
+  const selectedGallery = product.configurable_product_options_selection?.media_gallery
+    ? product.configurable_product_options_selection.media_gallery
+    : product.media_gallery;
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const galleryItem of selectedGallery) {
     images.push({
       small: galleryItem.url,
       normal: galleryItem.url,
@@ -109,6 +114,7 @@ export const getAttributes = (
   const attributes = {};
   const configurableOptions = products.configurable_options;
 
+  // eslint-disable-next-line no-restricted-syntax
   for (const option of configurableOptions) {
     attributes[option.attribute_code] = {
       name: option.attribute_code,
@@ -163,6 +169,7 @@ export const getCategory = (product: Product, currentUrlPath: string): Category 
 
   const categoryPath = categories.join('/');
 
+  // eslint-disable-next-line no-restricted-syntax
   for (const category of product.categories) {
     if (`/${category.url_path}` === categoryPath) {
       return category;
@@ -225,6 +232,8 @@ export const getProductRelatedProduct = (product: Product): Product[] => product
 
 export const getProductUpsellProduct = (product: Product): Product[] => product?.upsell_products?.filter((p) => p.name && p.uid) || [];
 
+export const getSwatchData = (swatchData: Product['configurable_options'][0]['values'][0]['swatch_data']): string | undefined => swatchData?.value;
+
 export interface ProductGetters extends ProductGettersBase<Product, ProductVariantFilters>{
   getCategory(product: Product, currentUrlPath: string): Category | null;
   getProductRelatedProduct(product: Product): Product[];
@@ -234,6 +243,7 @@ export interface ProductGetters extends ProductGettersBase<Product, ProductVaria
   getShortDescription(product: Product): string;
   getSlug(product: Product, category?: Category): string;
   getTypeId(product: Product): string;
+  getSwatchData(swatchData: Product['configurable_options'][0]['values'][0]['swatch_data']): string | undefined;
 }
 
 const productGetters: ProductGetters = {
@@ -258,6 +268,7 @@ const productGetters: ProductGetters = {
   getSlug,
   getTotalReviews,
   getTypeId,
+  getSwatchData,
 };
 
 export default productGetters;

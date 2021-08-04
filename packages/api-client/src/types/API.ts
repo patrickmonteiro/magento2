@@ -76,7 +76,7 @@ import {
   UpdateCartItemsMutation,
   UpdateCustomerAddressMutation,
   UpsellProductsQuery,
-  UrlResloverQuery,
+  UrlResolverQuery,
   WishlistItemInterface,
   WishlistQuery,
   WishlistQueryVariables,
@@ -90,11 +90,16 @@ import {
   CreateCustomerMutation,
   AddProductsToWishlistMutationVariables,
   AddProductsToWishlistMutation,
-  WishlistdataFragment,
-  UpdateCustomerEmailMutationVariables, RemoveProductsFromWishlistMutationVariables, RemoveProductsFromWishlistMutation, GetCustomerAddressesQuery,
+  WishlistDataFragment,
+  UpdateCustomerEmailMutationVariables,
+  RemoveProductsFromWishlistMutationVariables,
+  RemoveProductsFromWishlistMutation,
+  GetCustomerAddressesQuery,
+  AddProductsToCartMutation,
 } from './GraphQL';
 import { SetPaymentMethodOnCartInputs } from '../api/setPaymentMethodOnCart';
 import { CustomerProductReviewParams } from '../api/customerProductReview';
+import { AddProductsToCartInput } from '../api/addProductsToCart';
 
 export interface Product extends ProductInterface, ConfigurableProduct, BundleProduct {
 }
@@ -117,10 +122,10 @@ export type ProductAttributeFilter = ProductAttributeFilterInput;
 export type ProductReview = ProductReviewQuery['products']['items'][0]['reviews']['items'][0];
 export type ProductReviews = ProductReviewQuery['products']['items'][0];
 export type ReviewMetadata = ProductReviewRatingsMetadataQuery['productReviewRatingsMetadata']['items'][0];
-export type Route = UrlResloverQuery['urlResolver'];
+export type Route = UrlResolverQuery['urlResolver'];
 export type ShippingMethod = AvailableShippingMethod;
 export type StoreConfig = StoreConfigQuery['storeConfig'];
-export type Wishlist = WishlistdataFragment;
+export type Wishlist = WishlistDataFragment;
 export type WishlistProduct = WishlistItemInterface;
 
 export const enum ProductsQueryType {
@@ -147,6 +152,8 @@ export interface MagentoApiMethods {
   addConfigurableProductsToCart(input: AddConfigurableProductsToCartInput): Promise<FetchResult<AddConfigurableProductsToCartMutation>>;
 
   addSimpleProductsToCart(input: AddSimpleProductsToCartInput): Promise<FetchResult<AddSimpleProductsToCartMutation>>;
+
+  addProductsToCart(input: AddProductsToCartInput): Promise<FetchResult<AddProductsToCartMutation>>;
 
   applyCouponToCart(input: ApplyCouponToCartInput): Promise<FetchResult<ApplyCouponToCartMutation>>;
 
@@ -252,7 +259,7 @@ export interface MagentoApiMethods {
   upsellProduct(searchParams: GetProductSearchParams, customQuery?: CustomQuery):
   Promise<ApolloQueryResult<UpsellProductsQuery>>;
 
-  urlResolver(url: string): Promise<ApolloQueryResult<UrlResloverQuery>>;
+  urlResolver(url: string): Promise<ApolloQueryResult<UrlResolverQuery>>;
 
   wishlist(queryParams: WishlistQueryVariables): Promise<ApolloQueryResult<WishlistQuery>>;
 }

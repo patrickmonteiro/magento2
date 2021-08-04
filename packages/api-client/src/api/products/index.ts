@@ -1,3 +1,4 @@
+import gql from 'graphql-tag';
 import { ApolloQueryResult } from 'apollo-client';
 import { CustomQuery } from '@vue-storefront/core';
 import {
@@ -6,7 +7,7 @@ import {
   ProductsListQuery,
   ProductsListQueryVariables,
 } from '../../types/GraphQL';
-import listQuery from './productsListQuery.graphql';
+import productsList from './productsList';
 import { Context } from '../../types/context';
 import { GetProductSearchParams } from '../../types/API';
 
@@ -43,15 +44,19 @@ export default async (
   const { products } = context.extendQuery(
     customQuery, {
       products: {
-        query: listQuery,
+        query: productsList,
         variables: defaultParams,
       },
     },
   );
 
-  return context.client.query<ProductsListQuery, ProductsListQueryVariables>({
-    query: products.query,
-    variables: products.variables,
-    fetchPolicy: 'no-cache',
-  });
+  try {
+    return await context.client.query<ProductsListQuery, ProductsListQueryVariables>({
+      query: gql`${products.query}`,
+      variables: products.variables,
+      fetchPolicy: 'no-cache',
+    });
+  } catch (error) {
+    throw error.graphQLErrors?.[0] || error.networkError?.result || error;
+  }
 };

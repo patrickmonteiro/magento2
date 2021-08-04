@@ -1,7 +1,9 @@
-import { CustomQuery } from '@vue-storefront/core';
 import { ApolloQueryResult } from '@apollo/client';
+import gql from 'graphql-tag';
+import { CustomQuery } from '@vue-storefront/core';
+
 import { Context } from '../../types/context';
-import customerQuery from './CustomerShippingMethods.graphql';
+import CustomerAvailableShippingMethods from './CustomerShippingMethods';
 import {
   CustomerAvailableShippingMethodsQuery,
 } from '../../types/GraphQL';
@@ -13,13 +15,13 @@ export default async (
   const { shippingMethods } = context.extendQuery(customQuery,
     {
       shippingMethods: {
-        query: customerQuery,
+        query: CustomerAvailableShippingMethods,
       },
     });
 
   try {
     return await context.client.query<CustomerAvailableShippingMethodsQuery>({
-      query: shippingMethods.query,
+      query: gql`${shippingMethods.query}`,
       fetchPolicy: 'no-cache',
     });
   } catch (error) {
