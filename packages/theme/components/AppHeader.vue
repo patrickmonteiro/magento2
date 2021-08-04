@@ -43,6 +43,7 @@
             />
           </SfButton>
           <SfButton
+            v-if="isWishlistEnabled"
             class="sf-button--pure sf-header__action"
             @click="toggleWishlistSidebar"
           >
@@ -180,6 +181,13 @@ export default defineComponent({
     SfOverlay,
   },
   directives: { clickOutside },
+  props: {
+    isWishlistEnabled: {
+      type: Boolean,
+      default: true,
+      required: false,
+    },
+  },
   setup() {
     const { router } = useVueRouter();
     const { toggleCartSidebar, toggleWishlistSidebar, toggleLoginModal } = useUiState();
