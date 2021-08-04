@@ -11,8 +11,10 @@
           class="sf-header__logo"
         >
           <SfImage
-            src="/icons/logo.svg"
-            alt="Vue Storefront Next"
+            :src="logoConfig.logoSrc"
+            :alt="logoConfig.logoAlt"
+            :width="logoConfig.logoWidth"
+            :height="logoConfig.logoHeight"
             class="sf-header__logo-image"
           />
         </nuxt-link>
@@ -185,6 +187,11 @@ export default defineComponent({
     isWishlistEnabled: {
       type: Boolean,
       default: true,
+      required: false,
+    },
+    logoConfig: {
+      type: Object,
+      default: () => ({}),
       required: false,
     },
   },

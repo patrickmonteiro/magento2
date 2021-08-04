@@ -4,7 +4,10 @@
       <TopBar class="desktop-only" />
     </LazyHydrate>
     <LazyHydrate when-idle>
-      <AppHeader :is-wishlist-enabled="isWishlistEnabled" />
+      <AppHeader
+        :is-wishlist-enabled="isWishlistEnabled"
+        :logo-config="logoConfig"
+      />
     </LazyHydrate>
 
     <div id="layout">
@@ -38,6 +41,7 @@ import Notification from '~/components/Notification';
 import TopBar from '~/components/TopBar.vue';
 import WishlistSidebar from '~/components/WishlistSidebar.vue';
 import { getHtmlHead } from '~/helpers/hooks/useConfig/getHtmlHead.ts';
+import { getLogo } from '~/helpers/hooks/useConfig/getLogo.ts';
 
 export default {
   name: 'DefaultLayout',
@@ -52,7 +56,7 @@ export default {
     LoginModal,
     Notification,
   },
-  setup() {
+  setup(_, ctx) {
     const {
       config,
       loading,
@@ -62,9 +66,18 @@ export default {
     onSSR(async () => {
       await loadConfig();
     });
+    const logoObj = getLogo(config.value);
+    const logoConfig = {
+      logoAlt: logoObj.logoAlt || 'Vue Storefront Next',
+      logoSrc: logoObj.logoSrc || '/icons/logo.svg',
+      logoWidth: logoObj.logoWidth || '',
+      logoHeight: logoObj.logoHeight || '',
+    };
+
     return {
       config,
       loading,
+      logoConfig,
       isWishlistEnabled: computed(() => +config?.value?.magento_wishlist_general_is_enabled === 1),
     };
   },
