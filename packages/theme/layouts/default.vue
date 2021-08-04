@@ -4,7 +4,7 @@
       <TopBar class="desktop-only" />
     </LazyHydrate>
     <LazyHydrate when-idle>
-      <AppHeader />
+      <AppHeader :is-wishlist-enabled="isWishlistEnabled" />
     </LazyHydrate>
 
     <div id="layout">
@@ -14,7 +14,7 @@
         <BottomNavigation />
       </LazyHydrate>
       <CartSidebar />
-      <WishlistSidebar />
+      <WishlistSidebar v-if="isWishlistEnabled" />
       <LoginModal />
       <Notification />
     </div>
@@ -27,6 +27,7 @@
 <script>
 import { onSSR } from '@vue-storefront/core';
 import { useConfig } from '@vue-storefront/magento';
+import { computed } from '@vue/composition-api';
 import LazyHydrate from 'vue-lazy-hydration';
 import AppFooter from '~/components/AppFooter.vue';
 import AppHeader from '~/components/AppHeader.vue';
@@ -36,6 +37,7 @@ import LoginModal from '~/components/LoginModal.vue';
 import Notification from '~/components/Notification';
 import TopBar from '~/components/TopBar.vue';
 import WishlistSidebar from '~/components/WishlistSidebar.vue';
+import { getHtmlHead } from '~/helpers/hooks/useConfig/getHtmlHead.ts';
 
 export default {
   name: 'DefaultLayout',
@@ -63,19 +65,20 @@ export default {
     return {
       config,
       loading,
+      isWishlistEnabled: computed(() => +config?.value?.magento_wishlist_general_is_enabled === 1),
     };
   },
   head() {
     const {
-      default_title: title,
-      default_description: description,
-      default_keywords: keywords,
-      head_shortcut_icon: icon,
-      locale: lang,
-      title_prefix: titlePrefix,
-      title_separator: titleSeparator,
-      title_suffix: titleSuffix,
-    } = this.config;
+      title,
+      description,
+      keywords,
+      icon,
+      lang,
+      titlePrefix,
+      titleSeparator,
+      titleSuffix,
+    } = getHtmlHead(this.config);
 
     const meta = [];
     const link = [];
