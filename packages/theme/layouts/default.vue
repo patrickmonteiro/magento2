@@ -82,7 +82,7 @@ export default {
 
     const meta = [];
     const link = [];
-    const titleTemplate = `${titlePrefix !== null ? (`${titlePrefix} `) : ''}${titlePrefix !== null ? (`${titleSeparator} `) : ''}%s${titleSuffix !== null ? (` ${titleSuffix} `) : ''}${titleSuffix !== null ? (`${titleSuffix}`) : ''}`;
+    const titleTemplate = `${titlePrefix !== null ? (`${titlePrefix} `) : ''}${titlePrefix !== null ? (`${titleSeparator} `) : ''}%s${titleSuffix !== null ? (` ${titleSeparator} `) : ''}${titleSuffix !== null ? (`${titleSuffix}`) : ''}`;
 
     meta.push({
       hid: 'description',
